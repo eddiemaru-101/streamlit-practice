@@ -60,10 +60,19 @@ k4.metric("퇴직율", f"{quit_rate:.1f}%")
 # 3) 그래프 1: 부서별 퇴직율
 if "부서" in df.columns:
     dept = (df.groupby("부서")["퇴직"].mean().sort_values(ascending=False)*100)
+    # 부서명을 영어로 매핑
+    dept_mapping = {
+        "Research & Development": "R&D",
+        "Sales": "Sales",
+        "Human Resources": "HR"
+    }
+    dept.index = [dept_mapping.get(x, x) for x in dept.index]
+    
     st.subheader("부서별 퇴직율")
     fig1, ax1 = plt.subplots(figsize=(7.5,3.8))
     sns.barplot(x=dept.index, y=dept.values, ax=ax1)
     ax1.set_ylabel("Turnover Rate (%)"); 
+    ax1.set_xlabel("Department")
     ax1.bar_label(ax1.containers[0], fmt="%.1f")
     plt.xticks(rotation=15); 
     st.pyplot(fig1)
@@ -91,18 +100,22 @@ if "급여증가분백분율" in df.columns:
 col_name = "야근정도"
 if col_name in df.columns:
     ot = (df.groupby(col_name)["퇴직"].mean()*100)
+    # 야근 라벨을 영어로 변경
+    ot.index = ot.index.map({"Yes": "Overtime", "No": "No Overtime"})
+    
     with c2:
         st.subheader("⏰ 야근정도별 퇴직율")
         fig3, ax3 = plt.subplots(figsize=(6.5,3.5))
         sns.barplot(x=ot.index, y=ot.values, ax=ax3)
         ax3.set_ylabel("Turnover Rate (%)"); 
+        ax3.set_xlabel("Overtime Status")
         ax3.bar_label(ax3.containers[0], fmt="%.1f")
         st.pyplot(fig3)
 
 # 5) 연령대별 퇴직율 분석
 st.subheader("📊 연령대별 퇴직율 분석")
 if "나이" in df.columns:
-    df["연령대"] = pd.cut(df["나이"], bins=[0,30,40,50,100], labels=["20대","30대","40대","50대+"])
+    df["연령대"] = pd.cut(df["나이"], bins=[0,30,40,50,100], labels=["20s","30s","40s","50s+"])
     age_quit = df.groupby("연령대")["퇴직"].mean()*100
     
     c3, c4 = st.columns(2)
@@ -146,7 +159,7 @@ if "근속연수" in df.columns and "마지막승진년수" in df.columns:
     
     with c8:
         # 근속연수별 퇴직율
-        df["근속그룹"] = pd.cut(df["근속연수"], bins=[-1,2,5,10,50], labels=["신입(0-2년)","중급(3-5년)","시니어(6-10년)","베테랑(10년+)"])
+        df["근속그룹"] = pd.cut(df["근속연수"], bins=[-1,2,5,10,50], labels=["Junior(0-2y)","Mid(3-5y)","Senior(6-10y)","Expert(10y+)"])
         tenure_quit = df.groupby("근속그룹")["퇴직"].mean()*100
         
         fig6, ax6 = plt.subplots(figsize=(6,4))
@@ -188,10 +201,21 @@ if "월급여" in df.columns and "나이" in df.columns:
 # 9) 성별-부서별 퇴직율 히트맵
 st.subheader("🔥 성별-부서별 퇴직율 히트맵")
 if "성별" in df.columns and "부서" in df.columns:
-    gender_dept = df.pivot_table(values="퇴직", index="성별", columns="부서", aggfunc="mean")*100
+    # 성별과 부서를 영어로 매핑
+    df_temp = df.copy()
+    df_temp["성별"] = df_temp["성별"].map({"Male": "Male", "Female": "Female"})
+    df_temp["부서"] = df_temp["부서"].map({
+        "Research & Development": "R&D",
+        "Sales": "Sales", 
+        "Human Resources": "HR"
+    })
+    
+    gender_dept = df_temp.pivot_table(values="퇴직", index="성별", columns="부서", aggfunc="mean")*100
     
     fig9, ax9 = plt.subplots(figsize=(10,4))
     sns.heatmap(gender_dept, annot=True, fmt=".1f", cmap="Reds", ax=ax9)
+    ax9.set_xlabel("Department")
+    ax9.set_ylabel("Gender")
     plt.title("Turnover Rate by Gender-Department (%)")
     st.pyplot(fig9)
 
