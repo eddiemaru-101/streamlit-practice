@@ -5,7 +5,7 @@ import seaborn as sns
 import numpy as np
 
 # 한글 폰트 설정
-plt.rcParams['font.family'] = "NanumGothic"
+plt.rcParams['font.family'] =  "Malgun Gothic"
 plt.rcParams['axes.unicode_minus'] = False
 
 
