@@ -25,7 +25,7 @@ def load_df(path:str ="HR_Data.csv") -> pd.DataFrame:
     try:
         df = pd.read_csv(path, encoding="utf-8")
     except: 
-        return df 
+        return pd.DataFrame()
     df["퇴직"] = df["퇴직여부"].map({"Yes":1, "No":0}).astype("int8")
     df.drop(['직원수', '18세이상'], axis=1, inplace=True)
     return df
