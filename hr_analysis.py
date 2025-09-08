@@ -31,8 +31,6 @@ def load_df(path:str ="HR_Data.csv") -> pd.DataFrame:
     return df
 
 
-
-
 df = load_df()
 if df.empty:
     st.error("데이터가 없습니다. 'HR_Data.csv' 파일을 확인하세요.")
@@ -84,7 +82,6 @@ if "급여증가분백분율" in df.columns:
 col_name = "야근정도"
 if col_name in df.columns:
     ot = (df.groupby(col_name)["퇴직"].mean()*100)
-#    ot.index = ot.index.map({"No":"없음","Yes":"있음"}).astype(str)
     with c2:
         st.subheader("⏰ 야근정도별 퇴직율")
         fig3, ax3 = plt.subplots(figsize=(6.5,3.5))
@@ -92,3 +89,123 @@ if col_name in df.columns:
         ax3.set_ylabel("퇴직율(%)"); 
         ax3.bar_label(ax3.containers[0], fmt="%.1f")
         st.pyplot(fig3)
+
+# 5) 연령대별 퇴직율 분석
+st.subheader("📊 연령대별 퇴직율 분석")
+if "나이" in df.columns:
+    df["연령대"] = pd.cut(df["나이"], bins=[0,30,40,50,100], labels=["20대","30대","40대","50대+"])
+    age_quit = df.groupby("연령대")["퇴직"].mean()*100
+    
+    c3, c4 = st.columns(2)
+    with c3:
+        fig4, ax4 = plt.subplots(figsize=(6,4))
+        sns.barplot(x=age_quit.index, y=age_quit.values, ax=ax4, palette="viridis")
+        ax4.set_ylabel("퇴직율(%)")
+        ax4.set_xlabel("연령대")
+        ax4.bar_label(ax4.containers[0], fmt="%.1f")
+        plt.title("연령대별 퇴직율")
+        st.pyplot(fig4)
+    
+    with c4:
+        age_dist = df["연령대"].value_counts().sort_index()
+        fig5, ax5 = plt.subplots(figsize=(6,4))
+        colors = plt.cm.Set3(np.linspace(0,1,len(age_dist)))
+        wedges, texts, autotexts = ax5.pie(age_dist.values, labels=age_dist.index, autopct='%1.1f%%', colors=colors)
+        plt.title("전체 직원 연령대 분포")
+        st.pyplot(fig5)
+
+# 6) 업무만족도와 퇴직율 상관관계
+st.subheader("😊 업무만족도별 퇴직율")
+satisfaction_cols = ["업무만족도", "업무환경만족도", "업무참여도"]
+c5, c6, c7 = st.columns(3)
+
+for i, col in enumerate(satisfaction_cols):
+    if col in df.columns:
+        sat_quit = df.groupby(col)["퇴직"].mean()*100
+        with [c5, c6, c7][i]:
+            fig, ax = plt.subplots(figsize=(5,3.5))
+            sns.lineplot(x=sat_quit.index, y=sat_quit.values, marker="o", ax=ax, color=["red","blue","green"][i])
+            ax.set_xlabel(col)
+            ax.set_ylabel("퇴직율(%)")
+            ax.set_title(f"{col} vs 퇴직율")
+            st.pyplot(fig)
+
+# 7) 근속연수와 승진 분석
+st.subheader("🏆 근속연수 및 승진 분석")
+if "근속연수" in df.columns and "마지막승진년수" in df.columns:
+    c8, c9 = st.columns(2)
+    
+    with c8:
+        # 근속연수별 퇴직율
+        df["근속그룹"] = pd.cut(df["근속연수"], bins=[-1,2,5,10,50], labels=["신입(0-2년)","중급(3-5년)","시니어(6-10년)","베테랑(10년+)"])
+        tenure_quit = df.groupby("근속그룹")["퇴직"].mean()*100
+        
+        fig6, ax6 = plt.subplots(figsize=(6,4))
+        sns.barplot(x=tenure_quit.index, y=tenure_quit.values, ax=ax6, palette="coolwarm")
+        ax6.set_ylabel("퇴직율(%)")
+        ax6.set_xlabel("근속연수 그룹")
+        ax6.bar_label(ax6.containers[0], fmt="%.1f")
+        plt.xticks(rotation=45)
+        plt.title("근속연수별 퇴직율")
+        st.pyplot(fig6)
+    
+    with c9:
+        # 승진 횟수와 퇴직율 관계
+        promo_quit = df.groupby("마지막승진년수")["퇴직"].mean()*100
+        fig7, ax7 = plt.subplots(figsize=(6,4))
+        ax7.scatter(promo_quit.index, promo_quit.values, s=60, alpha=0.7, color="orange")
+        ax7.set_xlabel("마지막승진년수")
+        ax7.set_ylabel("퇴직율(%)")
+        plt.title("마지막승진년수 vs 퇴직율")
+        st.pyplot(fig7)
+
+# 8) 급여 vs 연령 vs 퇴직 3차원 분석
+st.subheader("💰 급여-연령-퇴직 종합 분석")
+if "월급여" in df.columns and "나이" in df.columns:
+    fig8, ax8 = plt.subplots(figsize=(10,6))
+    
+    # 퇴직자와 재직자 분리
+    quit_yes = df[df["퇴직여부"]=="Yes"]
+    quit_no = df[df["퇴직여부"]=="No"]
+    
+    ax8.scatter(quit_no["나이"], quit_no["월급여"], alpha=0.6, c="blue", label="재직자", s=30)
+    ax8.scatter(quit_yes["나이"], quit_yes["월급여"], alpha=0.8, c="red", label="퇴직자", s=30)
+    ax8.set_xlabel("나이")
+    ax8.set_ylabel("월급여")
+    ax8.legend()
+    plt.title("나이-급여 분포 (퇴직여부별)")
+    st.pyplot(fig8)
+
+# 9) 성별-부서별 퇴직율 히트맵
+st.subheader("🔥 성별-부서별 퇴직율 히트맵")
+if "성별" in df.columns and "부서" in df.columns:
+    gender_dept = df.pivot_table(values="퇴직", index="성별", columns="부서", aggfunc="mean")*100
+    
+    fig9, ax9 = plt.subplots(figsize=(10,4))
+    sns.heatmap(gender_dept, annot=True, fmt=".1f", cmap="Reds", ax=ax9)
+    plt.title("성별-부서별 퇴직율 (%)")
+    st.pyplot(fig9)
+
+# 10) 핵심 인사이트 요약
+st.subheader("🎯 핵심 인사이트")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("""
+    **🔍 주요 발견사항:**
+    - 가장 높은 퇴직율을 보이는 부서 확인
+    - 급여 인상률과 퇴직율의 역관계
+    - 야근이 퇴직에 미치는 영향
+    - 연령대별 퇴직 패턴 분석
+    """)
+
+with col2:
+    if "부서" in df.columns:
+        highest_quit_dept = (df.groupby("부서")["퇴직"].mean()*100).idxmax()
+        highest_quit_rate = (df.groupby("부서")["퇴직"].mean()*100).max()
+        st.metric("최고 퇴직율 부서", highest_quit_dept, f"{highest_quit_rate:.1f}%")
+    
+    if "연령대" in df.columns:
+        age_quit_max = age_quit.idxmax()
+        age_quit_rate = age_quit.max()
+        st.metric("최고 위험 연령대", age_quit_max, f"{age_quit_rate:.1f}%")
