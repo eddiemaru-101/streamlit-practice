@@ -12,12 +12,21 @@ import seaborn as sns
 # plt.rcParams["font.family"] = "NanumGothic"
 # plt.rcParams["axes.unicode_minus"] = False
 
-# 한글 폰트 설정
-plt.rcParams['font.family'] = "Malgun Gothic"
+# 한글 폰트 설정 (배포 환경 호환)
+try:
+    plt.rcParams['font.family'] = "Malgun Gothic"
+except:
+    try:
+        plt.rcParams['font.family'] = "DejaVu Sans"
+    except:
+        plt.rcParams['font.family'] = "sans-serif"
 plt.rcParams['axes.unicode_minus'] = False
 
 st.set_page_config(page_title="퇴직율 대시보드", layout="wide")
-sns.set(style="whitegrid",font= "Malgun Gothic")
+try:
+    sns.set(style="whitegrid", font="Malgun Gothic")
+except:
+    sns.set(style="whitegrid")
 
 # 1) 데이터 로드
 @st.cache_data
