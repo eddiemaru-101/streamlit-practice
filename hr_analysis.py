@@ -54,7 +54,7 @@ if "부서" in df.columns:
     st.subheader("부서별 퇴직율")
     fig1, ax1 = plt.subplots(figsize=(7.5,3.8))
     sns.barplot(x=dept.index, y=dept.values, ax=ax1)
-    ax1.set_ylabel("퇴직율(%)"); 
+    ax1.set_ylabel("Turnover Rate (%)"); 
     ax1.bar_label(ax1.containers[0], fmt="%.1f")
     plt.xticks(rotation=15); 
     st.pyplot(fig1)
@@ -73,8 +73,8 @@ if "급여증가분백분율" in df.columns:
         st.subheader("💰 급여인상율과 퇴직율")
         fig2, ax2 = plt.subplots(figsize=(6.5,3.5))
         sns.lineplot(x=sal.index, y=sal.values, marker="o", ax=ax2)
-        ax2.set_xlabel("급여인상율(%)"); 
-        ax2.set_ylabel("퇴직율(%)")
+        ax2.set_xlabel("Salary Increase Rate (%)"); 
+        ax2.set_ylabel("Turnover Rate (%)")
         st.pyplot(fig2)
 
 
@@ -86,7 +86,7 @@ if col_name in df.columns:
         st.subheader("⏰ 야근정도별 퇴직율")
         fig3, ax3 = plt.subplots(figsize=(6.5,3.5))
         sns.barplot(x=ot.index, y=ot.values, ax=ax3)
-        ax3.set_ylabel("퇴직율(%)"); 
+        ax3.set_ylabel("Turnover Rate (%)"); 
         ax3.bar_label(ax3.containers[0], fmt="%.1f")
         st.pyplot(fig3)
 
@@ -100,10 +100,10 @@ if "나이" in df.columns:
     with c3:
         fig4, ax4 = plt.subplots(figsize=(6,4))
         sns.barplot(x=age_quit.index, y=age_quit.values, ax=ax4, palette="viridis")
-        ax4.set_ylabel("퇴직율(%)")
-        ax4.set_xlabel("연령대")
+        ax4.set_ylabel("Turnover Rate (%)")
+        ax4.set_xlabel("Age Group")
         ax4.bar_label(ax4.containers[0], fmt="%.1f")
-        plt.title("연령대별 퇴직율")
+        plt.title("Turnover Rate by Age Group")
         st.pyplot(fig4)
     
     with c4:
@@ -111,7 +111,7 @@ if "나이" in df.columns:
         fig5, ax5 = plt.subplots(figsize=(6,4))
         colors = plt.cm.Set3(np.linspace(0,1,len(age_dist)))
         wedges, texts, autotexts = ax5.pie(age_dist.values, labels=age_dist.index, autopct='%1.1f%%', colors=colors)
-        plt.title("전체 직원 연령대 분포")
+        plt.title("Employee Age Distribution")
         st.pyplot(fig5)
 
 # 6) 업무만족도와 퇴직율 상관관계
@@ -125,9 +125,9 @@ for i, col in enumerate(satisfaction_cols):
         with [c5, c6, c7][i]:
             fig, ax = plt.subplots(figsize=(5,3.5))
             sns.lineplot(x=sat_quit.index, y=sat_quit.values, marker="o", ax=ax, color=["red","blue","green"][i])
-            ax.set_xlabel(col, fontproperties="Malgun Gothic")
-            ax.set_ylabel("퇴직율(%)", fontproperties="Malgun Gothic")
-            ax.set_title(f"{col} vs 퇴직율", fontproperties="Malgun Gothic")
+            ax.set_xlabel(col.replace("업무만족도", "Job Satisfaction").replace("업무환경만족도", "Work Environment").replace("업무참여도", "Work Engagement"))
+            ax.set_ylabel("Turnover Rate (%)")
+            ax.set_title(f"{col.replace('업무만족도', 'Job Satisfaction').replace('업무환경만족도', 'Work Environment').replace('업무참여도', 'Work Engagement')} vs Turnover")
             st.pyplot(fig)
 
 # 7) 근속연수와 승진 분석
@@ -142,11 +142,11 @@ if "근속연수" in df.columns and "마지막승진년수" in df.columns:
         
         fig6, ax6 = plt.subplots(figsize=(6,4))
         sns.barplot(x=tenure_quit.index, y=tenure_quit.values, ax=ax6, palette="coolwarm")
-        ax6.set_ylabel("퇴직율(%)")
-        ax6.set_xlabel("근속연수 그룹")
+        ax6.set_ylabel("Turnover Rate (%)")
+        ax6.set_xlabel("Tenure Group")
         ax6.bar_label(ax6.containers[0], fmt="%.1f")
         plt.xticks(rotation=45)
-        plt.title("근속연수별 퇴직율")
+        plt.title("Turnover Rate by Tenure")
         st.pyplot(fig6)
     
     with c9:
@@ -154,9 +154,9 @@ if "근속연수" in df.columns and "마지막승진년수" in df.columns:
         promo_quit = df.groupby("마지막승진년수")["퇴직"].mean()*100
         fig7, ax7 = plt.subplots(figsize=(6,4))
         ax7.scatter(promo_quit.index, promo_quit.values, s=60, alpha=0.7, color="orange")
-        ax7.set_xlabel("마지막승진년수")
-        ax7.set_ylabel("퇴직율(%)")
-        plt.title("마지막승진년수 vs 퇴직율")
+        ax7.set_xlabel("Years Since Last Promotion")
+        ax7.set_ylabel("Turnover Rate (%)")
+        plt.title("Years Since Promotion vs Turnover")
         st.pyplot(fig7)
 
 # 8) 급여 vs 연령 vs 퇴직 3차원 분석
@@ -168,12 +168,12 @@ if "월급여" in df.columns and "나이" in df.columns:
     quit_yes = df[df["퇴직여부"]=="Yes"]
     quit_no = df[df["퇴직여부"]=="No"]
     
-    ax8.scatter(quit_no["나이"], quit_no["월급여"], alpha=0.6, c="blue", label="재직자", s=30)
-    ax8.scatter(quit_yes["나이"], quit_yes["월급여"], alpha=0.8, c="red", label="퇴직자", s=30)
-    ax8.set_xlabel("나이")
-    ax8.set_ylabel("월급여")
+    ax8.scatter(quit_no["나이"], quit_no["월급여"], alpha=0.6, c="blue", label="Active", s=30)
+    ax8.scatter(quit_yes["나이"], quit_yes["월급여"], alpha=0.8, c="red", label="Resigned", s=30)
+    ax8.set_xlabel("Age")
+    ax8.set_ylabel("Monthly Salary")
     ax8.legend()
-    plt.title("나이-급여 분포 (퇴직여부별)")
+    plt.title("Age-Salary Distribution by Employment Status")
     st.pyplot(fig8)
 
 # 9) 성별-부서별 퇴직율 히트맵
@@ -183,7 +183,7 @@ if "성별" in df.columns and "부서" in df.columns:
     
     fig9, ax9 = plt.subplots(figsize=(10,4))
     sns.heatmap(gender_dept, annot=True, fmt=".1f", cmap="Reds", ax=ax9)
-    plt.title("성별-부서별 퇴직율 (%)")
+    plt.title("Turnover Rate by Gender-Department (%)")
     st.pyplot(fig9)
 
 # 10) 핵심 인사이트 요약
