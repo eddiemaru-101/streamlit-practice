@@ -125,9 +125,9 @@ for i, col in enumerate(satisfaction_cols):
         with [c5, c6, c7][i]:
             fig, ax = plt.subplots(figsize=(5,3.5))
             sns.lineplot(x=sat_quit.index, y=sat_quit.values, marker="o", ax=ax, color=["red","blue","green"][i])
-            ax.set_xlabel(col)
-            ax.set_ylabel("퇴직율(%)")
-            ax.set_title(f"{col} vs 퇴직율")
+            ax.set_xlabel(col, fontproperties="Malgun Gothic")
+            ax.set_ylabel("퇴직율(%)", fontproperties="Malgun Gothic")
+            ax.set_title(f"{col} vs 퇴직율", fontproperties="Malgun Gothic")
             st.pyplot(fig)
 
 # 7) 근속연수와 승진 분석
