@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import koreanize_matplotlib  # 한글/마이너스 자동 설정
+#import koreanize_matplotlib  # 한글/마이너스 자동 설정
 #import matplotlib.font_manager as fm
 
 # NanumGothic 폰트 경로를 직접 지정
@@ -13,15 +13,15 @@ import koreanize_matplotlib  # 한글/마이너스 자동 설정
 # plt.rcParams["axes.unicode_minus"] = False
 
 # 한글 폰트 설정
-plt.rcParams['font.family'] = "NanumGothic"
+plt.rcParams['font.family'] = "Malgun Gothic"
 plt.rcParams['axes.unicode_minus'] = False
 
 st.set_page_config(page_title="퇴직율 대시보드", layout="wide")
-sns.set(style="whitegrid")
+sns.set(style="whitegrid",font= "Malgun Gothic")
 
 # 1) 데이터 로드
 @st.cache_data
-def load_df(path:str ="HR Data.csv") -> pd.DataFrame:
+def load_df(path:str ="HR_Data.csv") -> pd.DataFrame:
     try:
         df = pd.read_csv(path, encoding="utf-8")
     except: 
@@ -30,9 +30,12 @@ def load_df(path:str ="HR Data.csv") -> pd.DataFrame:
     df.drop(['직원수', '18세이상'], axis=1, inplace=True)
     return df
 
+
+
+
 df = load_df()
 if df.empty:
-    st.error("데이터가 없습니다. 'HR Data.csv' 파일을 확인하세요.")
+    st.error("데이터가 없습니다. 'HR_Data.csv' 파일을 확인하세요.")
     st.stop()
 
 # ===== KPI  =====
@@ -58,8 +61,10 @@ if "부서" in df.columns:
     plt.xticks(rotation=15); 
     st.pyplot(fig1)
 
+
 # 4) 그래프 2/3를 두 칼럼으로
 c1, c2 = st.columns(2)
+
 
 # (좌) 급여인상율과 퇴직율 (정수%로 라운딩 후 라인)
 if "급여증가분백분율" in df.columns:
@@ -73,6 +78,7 @@ if "급여증가분백분율" in df.columns:
         ax2.set_xlabel("급여인상율(%)"); 
         ax2.set_ylabel("퇴직율(%)")
         st.pyplot(fig2)
+
 
 # (우) 야근정도별 퇴직율 (Yes/No 막대)
 col_name = "야근정도"

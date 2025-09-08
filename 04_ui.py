@@ -19,9 +19,12 @@ showtimes = pd.DataFrame({
     "상영관": ["A관", "B관", "C관", "A관"],
     "시작시간": ["14:00", "16:30", "18:10", "20:00"]
 })
+
+csv_data = showtimes.to_csv(index=False, encoding='utf-8-sig')
+
 st.download_button(
     label="시간표 CSV 다운로드",
-    data=showtimes.to_csv(index=False),
+    data = csv_data,
     file_name="showtimes_sample.csv",
     mime="text/csv"
 )
